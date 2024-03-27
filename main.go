@@ -2,12 +2,14 @@ package main
 
 import (
     "fmt"
+    "crypto/rand"
+    "os"
     "test/filet"
 )
 
 var Rules filet.Rules = filet.Rules{
     RuleSet: []filet.Set{
-        filet.Set{
+        {
             CellValue: 0,
             CellState: false,
             TargetValue: 3,
@@ -15,7 +17,7 @@ var Rules filet.Rules = filet.Rules{
             ShouldBeTargeted: true,
             Opcode: filet.SWAP_CELLS,
         },
-        filet.Set{
+        {
             CellValue: 1,
             CellState: true,
             TargetValue: 5,
@@ -23,7 +25,7 @@ var Rules filet.Rules = filet.Rules{
             ShouldBeTargeted: false,
             Opcode: filet.KILL_CELL,
         },
-        filet.Set{
+        {
             CellValue: 2,
             CellState: true,
             TargetValue: 7,
@@ -31,7 +33,7 @@ var Rules filet.Rules = filet.Rules{
             ShouldBeTargeted: true,
             Opcode: filet.COPY_VALUE,
         },
-        filet.Set{
+        {
             CellValue: 3,
             CellState: false,
             TargetValue: 1,
@@ -39,7 +41,7 @@ var Rules filet.Rules = filet.Rules{
             ShouldBeTargeted: true,
             Opcode: filet.SWAP_CELLS,
         },
-        filet.Set{
+        {
             CellValue: 4,
             CellState: true,
             TargetValue: 0,
@@ -47,7 +49,7 @@ var Rules filet.Rules = filet.Rules{
             ShouldBeTargeted: false,
             Opcode: filet.SWAP_CELLS,
         },
-        filet.Set{
+        {
             CellValue: 5,
             CellState: false,
             TargetValue: 2,
@@ -55,7 +57,7 @@ var Rules filet.Rules = filet.Rules{
             ShouldBeTargeted: true,
             Opcode: filet.SWAP_CELLS,
         },
-        filet.Set{
+        {
             CellValue: 6,
             CellState: true,
             TargetValue: 4,
@@ -63,7 +65,7 @@ var Rules filet.Rules = filet.Rules{
             ShouldBeTargeted: true,
             Opcode: filet.SWAP_CELLS,
         },
-        filet.Set{
+        {
             CellValue: 7,
             CellState: false,
             TargetValue: 6,
@@ -74,65 +76,82 @@ var Rules filet.Rules = filet.Rules{
     },
     
     TargetCellsLocations: []filet.Coordinates{
-        filet.Coordinates{X: -42, Y: 36},
-        filet.Coordinates{X: -1, Y: 12},
-        filet.Coordinates{X: 82, Y: 0},
-        filet.Coordinates{X: 2, Y: 4},
-        filet.Coordinates{X: 6, Y: -99},
-        filet.Coordinates{X: 5, Y: -6},
-        filet.Coordinates{X: -6, Y: 2},
-        filet.Coordinates{X: 33, Y: 26},
-        filet.Coordinates{X: 0, Y: 35},
-        filet.Coordinates{X: 231, Y: -3},
-        filet.Coordinates{X: 6, Y: 25},
-        filet.Coordinates{X: -3, Y: -1},
+        {X: -42, Y: 36},
+        {X: -1,  Y: 12},
+        {X: 82,  Y: 0},
+        {X: 2,   Y: 4},
+        {X: 6,   Y: -99},
+        {X: 5,   Y: -6},
+        {X: -6,  Y: 2},
+        {X: 33,  Y: 26},
+        {X: 0,   Y: 35},
+        {X: 231, Y: -3},
+        {X: 6,   Y: 25},
+        {X: -3,  Y: -1},
     },
     TargetValues: filet.Target{
-        AliveValues: []int{
-
-        },
-        DeadValues: []int{
-
-        },
-        TargetIfAlive: []int{
-
-        },
-        TargetIfDead: []int{
-
-        },
+        AliveValues:   []int{ 1, 2, 5 },
+        DeadValues:    []int{ 0, 3, 4, 6 },
+        TargetIfAlive: []int{ 3, 4, 6 },
+        TargetIfDead:  []int{ 0, 1, 2, 5 },
     },
 }
 
 func main() {
-    /*
-    set := filet.Set{
-        cellValue: ,
-        cellState: ,
-        targetValue: ,
-        shouldBeTargeted: ,
-        opcode: ,
+    lines, cols := 4, 4
+    var grid filet.Grid = filet.Grid{State: filet.GenerateTwoDimArray(lines, cols)}
+    for i := 0; i < len(grid.State); i = i + 1 {
+        for j := 0; j < len(grid.State[i]); j = j + 1 {
+            tmp := make([]byte, 1)
+            _, err := rand.Read(tmp)
+            if err != nil {
+                fmt.Println("error:", err)
+                os.Exit(1)
+            }
+            grid.State[i][j].Value = int(tmp[0])
+            if grid.State[i][j].Value % 2 == 1 {
+                grid.State[i][j].State = true
+            }
+            if grid.State[i][j].Value % 2 == 0 {
+                grid.State[i][j].Value = -grid.State[i][j].Value
+                grid.State[i][j].State = false
+            }
+            grid.State[i][j].Position.X = i
+            grid.State[i][j].Position.Y = j
+            grid.State[i][j].ValidatedLinkedCells = make([]int, 0)
+            grid.State[i][j].IsIn = false
+        }
     }
-    */
 
-    var grid [][]filet.Cell = [][]filet.Cell{
-        []filet.Cell{
-            filet.Cell{Value: 0},
-            filet.Cell{Value: 1},
-        },
-        []filet.Cell{
-            filet.Cell{Value: 2},
-            filet.Cell{Value: 3},
-        },
-        []filet.Cell{
-            filet.Cell{Value: 4},
-            filet.Cell{Value: 5},
-        },
-        []filet.Cell{
-            filet.Cell{Value: 6},
-            filet.Cell{Value: 7},
-        },
+    for _, e := range grid.State {
+        for _, v := range e {
+            fmt.Printf("X: %d, Y: %d, V: %d, S: %v, VLC: %v, II: %v\n", 
+                v.Position.X,
+                v.Position.Y,
+                v.Value,
+                v.State,
+                v.ValidatedLinkedCells,
+                v.IsIn,
+            )
+        }
+        fmt.Println()
     }
-    
-
-
+    newGrid, err := filet.Catch(grid.State, Rules)
+    if err != nil {
+        fmt.Println(err)
+        os.Exit(1)
+    }
+    for _, e := range newGrid {
+        for _, v := range e {
+            fmt.Printf("X: %d, Y: %d, V: %d, S: %v, VLC: %v, II: %v\n", 
+                v.Position.X,
+                v.Position.Y,
+                v.Value,
+                v.State,
+                v.ValidatedLinkedCells,
+                v.IsIn,
+            )
+        }
+        fmt.Println()
+    }
 }

@@ -42,7 +42,7 @@ type Rules struct {
 
 /* define a cell, by default, isIn should be set to false, the program uses it to keep track of some conditional events. The validatedLinkedCells, is currently not used in the library, it can be used to check wether a cell have neighbors (with an opcode for example). the other elements are self explanatory. */
 type Cell struct {
-	Coordinates          Coordinates
+	Position          Coordinates
 	Value                int
 	State                bool
 	ValidatedLinkedCells []int
@@ -52,6 +52,17 @@ type Cell struct {
 /* the actual grid */
 type Grid struct {
 	State [][]Cell
+}
+
+func GenerateTwoDimArray(lines int, cols int) [][]Cell {
+    grid := make([][]Cell, 0)
+    for i := 0; i < lines; i = i + 1 {
+        grid = append(grid, make([]Cell, 0))
+        for j := 0; j < cols; j = j + 1 {
+            grid[i] = append(grid[i], Cell{})
+        }
+    }
+    return grid
 }
 
 /* this is the "main" function of this library, it's being used to process generations grom a grid to another generation */
@@ -64,16 +75,20 @@ func Catch(grid [][]Cell, rules Rules) ([][]Cell, error) {
 			if err != nil {
 				return nil, fmt.Errorf("< ! > Filet, CatchError: %s\n", err)
 			}
-            realTargetLocations := findRealTargetLocations(Coordinates{X: grid[i][j].Coordinates.X, Y: grid[i][j].Coordinates.Y}, rules.TargetCellsLocations, Coordinates{X: len(grid), Y: len(grid[0])})
-			switch grid[i][j].State {
+            
+            realTargetLocations, err := findRealTargetLocations(rules.TargetCellsLocations, Coordinates{X: len(grid), Y: len(grid[0])})
+			if err != nil {
+                return [][]Cell{}, fmt.Errorf("< ! > Filet, CatchError: %s\n", err)
+            }
+            switch grid[i][j].State {
 
 			case true:
-                err := nextGeneration(grid[:], Coordinates{X: i, Y: j}, realTargetLocations, rules.TargetValues.TargetIfAlive, rules.RuleSet[:])
+                err := nextGeneration(grid, Coordinates{X: i, Y: j}, realTargetLocations, rules.TargetValues.TargetIfAlive, rules.RuleSet[:])
 				if err != nil {
 					return nil, fmt.Errorf("< ! > Filet, CatchError: %s\n", err)
 				}
 			case false:
-                err := nextGeneration(grid[:], Coordinates{X: i, Y: j}, realTargetLocations, rules.TargetValues.TargetIfDead, rules.RuleSet[:])
+                err := nextGeneration(grid, Coordinates{X: i, Y: j}, realTargetLocations, rules.TargetValues.TargetIfDead, rules.RuleSet[:])
 				if err != nil {
 					return nil, fmt.Errorf("< ! > Filet, CatchError: %s\n", err)
 				}
@@ -95,7 +110,7 @@ func actualCellState(cellPosition Coordinates, rules Rules, grid [][]Cell) (bool
 /* comparing the states between cell and rule */
 func isDeadOrAlive(alive bool, dead bool) (bool, error) {
 	if alive == dead {
-		return false, fmt.Errorf("isCellDeadOrAlive() -> a cell can't be both alive and dead, got alive -> %t and dead -> %t", alive, dead)
+		return false, nil//fmt.Errorf("isDeadOrAlive() -> a cell can't be both alive and dead, got alive -> %t and dead -> %t", alive, dead)
 	} else if (alive == true) && (dead == false) {
 		return true, nil
 	} else if (dead == true) && (alive == false) {
@@ -123,73 +138,70 @@ func isDead(c int, t []int) bool {
 	return false
 }
 
-// update this function by adding the lower version and separating the lower and greater into other functiions
-func findRealTargetLocations(actualPosition Coordinates, targetAdresses []Coordinates, xyLen Coordinates) []Coordinates {
+func findRealTargetLocations(targetAddresses []Coordinates, xyLen Coordinates) ([]Coordinates, error) {
 
-	r := make([]Coordinates, len(targetAdresses))
+    ret := make([]Coordinates, 0)
 
-	for index, tCoordinates := range targetAdresses {
-        
-        if tCoordinates.X < 0 {
-            xUnderflow := checkPositionUnderflow(actualPosition.X, tCoordinates.X)
-            if xUnderflow == true {
-                r[index].X = xyLen.X - (actualPosition.X - tCoordinates.X)
-            } else {
-                r[index].X = actualPosition.X - tCoordinates.X
-            }
+    for _, coordinate := range targetAddresses {
+
+        tempValueOfX, err := findRealLocation(coordinate.X, xyLen.X)
+        if err != nil {
+            return []Coordinates{}, fmt.Errorf("findRealTargetLocations() -> %s", err)
         }
-        if tCoordinates.Y < 0 {
-            yUnderflow := checkPositionUnderflow(actualPosition.Y, tCoordinates.Y)
-            if yUnderflow == true {
-                r[index].Y = xyLen.Y - (actualPosition.Y - tCoordinates.Y)
-            } else {
-                r[index].Y = actualPosition.Y - tCoordinates.Y
-            }
+
+        tempValueOfY, err := findRealLocation(coordinate.Y, xyLen.Y)
+        if err != nil {
+            return []Coordinates{}, fmt.Errorf("findRealTargetLocations() -> %s", err)
         }
-        if tCoordinates.X > 0 {
-            xOverflow := checkPositionOverflow(actualPosition.X, tCoordinates.X, xyLen.X)
-            if xOverflow == true {
-                r[index].X = xyLen.X - tCoordinates.X
-            } else {
-                r[index].X = actualPosition.X + tCoordinates.X
-            }
-        }
-        if tCoordinates.Y > 0 {
-            yOverflow := checkPositionOverflow(actualPosition.Y, tCoordinates.Y, xyLen.Y)
-            if yOverflow == true {
-                r[index].Y = xyLen.Y - tCoordinates.Y
-            } else {
-                r[index].Y = actualPosition.Y + tCoordinates.Y
-            }
-        }
+        ret = append(ret, Coordinates{X: tempValueOfX, Y: tempValueOfY})
     }
-    return r
+    return ret, nil
+
 }
 
-/* here we check if the targetPosition can be reached out from cell's position */
-func checkPositionUnderflow(cellPosition int, targetPosition int) bool {
-    ret := false
-    if (targetPosition - cellPosition) < 0 {
-        ret = true
+func findRealLocation(target int, sizeLimit int) (int, error) {
+
+    if target < 0 {
+        return negativeLoopThrougth(target, sizeLimit), nil
+    
+    } else if target >= sizeLimit-1 {
+        return positiveLoopThrougth(target, sizeLimit-1), nil
+
+    } else if target >= 0 && target < sizeLimit {
+        return target, nil
+
+    } else {
+        return 0, fmt.Errorf("findRealLocation() -> Error when searching for new position, got 'target = %d', 'sizeLimit = %d'", target, sizeLimit)
     }
-    return ret
 }
 
-/* this function checks wether a cell position is out of bound of the grid */
-func checkPositionOverflow(cellPosition int, targetPosition int, length int) bool {
-    ret := false
-    if (targetPosition + cellPosition) > length {
-        ret = true
+func negativeLoopThrougth(target int, sizeLimit int) int {
+    temp := sizeLimit
+    for i := target ; i <= 0; i = i + 1 {
+        if temp == 0 {
+            temp = sizeLimit
+        }
+        temp = temp - 1
     }
-    return ret
+    return temp
+}
 
+func positiveLoopThrougth(target int, sizeLimit int) int {
+    temp := 0
+    for i := target ; i >= sizeLimit; i = i - 1 {
+        if temp == sizeLimit {
+            temp = 0
+        }
+        temp = temp + 1
+    }
+    return temp
 }
 
 /* this function processes the next generation of a cell */
 func nextGeneration(grid [][]Cell, cellPosition Coordinates, targetLocations []Coordinates, targetValues []int, ruleSet []Set) error {
 
+    //fmt.Println("\n\n", targetLocations)
 	for _, targetPosition := range targetLocations {
-
         cell := grid[cellPosition.X][cellPosition.Y]
         target := grid[targetPosition.X][targetPosition.Y]
         /* check if the cell and the target are in the targetted values respectively */
@@ -198,7 +210,7 @@ func nextGeneration(grid [][]Cell, cellPosition Coordinates, targetLocations []C
 
         index, ok := ruleCheck(ruleSet, cell, target)
         if ok == true {
-            err := processRule(ruleSet[index].Opcode, grid[:], cellPosition, targetPosition)
+            err := processRule(ruleSet[index].Opcode, grid, cellPosition, targetPosition)
             if err != nil {
                 return fmt.Errorf("nextGeneration() -> %s", err)
             }
@@ -212,25 +224,26 @@ func swapCell(grid [][]Cell, cellPosition Coordinates, targetPosition Coordinate
     /* swap cell with target may be hard to read but it's what it does */
 	grid[cellPosition.X][cellPosition.Y], grid[targetPosition.X][targetPosition.Y] = grid[targetPosition.X][targetPosition.Y], grid[cellPosition.X][cellPosition.Y]
     /* swap coordinates to prevent misleading values */
-    grid[cellPosition.X][cellPosition.Y].Coordinates.X, grid[targetPosition.X][targetPosition.Y].Coordinates.X = grid[targetPosition.X][targetPosition.Y].Coordinates.X, grid[cellPosition.X][cellPosition.Y].Coordinates.X 
-    grid[cellPosition.X][cellPosition.Y].Coordinates.Y, grid[targetPosition.Y][targetPosition.Y].Coordinates.Y = grid[targetPosition.Y][targetPosition.Y].Coordinates.Y,  grid[cellPosition.X][cellPosition.Y].Coordinates.Y
+    grid[cellPosition.X][cellPosition.Y].Position.X, grid[targetPosition.X][targetPosition.Y].Position.X = grid[targetPosition.X][targetPosition.Y].Position.X, grid[cellPosition.X][cellPosition.Y].Position.X 
+    grid[cellPosition.X][cellPosition.Y].Position.Y, grid[targetPosition.Y][targetPosition.Y].Position.Y = grid[targetPosition.Y][targetPosition.Y].Position.Y,  grid[cellPosition.X][cellPosition.Y].Position.Y
 }
 
 
 /* this function kills a cell value, channging it's state and value both to zero/false */
 func killCell(grid [][]Cell, cellPosition Coordinates) {
-	grid[cellPosition.X][cellPosition.Y].Value = 0
+    // to work as a game of life, this maybe required
+	//grid[cellPosition.X][cellPosition.Y].Value = 0
 	grid[cellPosition.X][cellPosition.Y].State = false
 }
 
 /* this function is an opcode used to opy a cell value to another */
 func copyCellValue(grid [][]Cell, cellPosition Coordinates, otherCell Coordinates) {
     /* saving old coordinates of the overwritten cell */
-    temp := grid[cellPosition.X][cellPosition.Y].Coordinates
+    temp := grid[cellPosition.X][cellPosition.Y].Position
 	/* copy */
     grid[cellPosition.X][cellPosition.Y] = grid[otherCell.X][otherCell.Y]
     /* re-assign the old coordinates */
-    grid[cellPosition.X][cellPosition.Y].Coordinates = temp
+    grid[cellPosition.X][cellPosition.Y].Position = temp
 }
 
 /* search from a slice of elements if a value is in the slice, here we use it to check wether the value is in a tagert list */
@@ -263,11 +276,11 @@ func ruleCheck(ruleSet []Set, cell Cell, target Cell) (int, bool) {
 func processRule(opcode uint8, grid [][]Cell, cellPosition Coordinates, targetPosition Coordinates) (error) {
     switch opcode {
         case 0:
-            killCell(grid[:], cellPosition)
+            killCell(grid, cellPosition)
         case 1:
-            swapCell(grid[:], cellPosition, targetPosition)
+            swapCell(grid, cellPosition, targetPosition)
         case 2:
-            copyCellValue(grid[:], cellPosition, targetPosition)
+            copyCellValue(grid, cellPosition, targetPosition)
         default:
             return fmt.Errorf("processRule() -> opcode with value '%d' isn't an instruction", opcode)
     }
