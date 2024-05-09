@@ -1,7 +1,7 @@
 package filet
 
 import (
-    "fmt"
+	"fmt"
 )
 
 type Coordinates struct {
@@ -17,17 +17,15 @@ func (xyLen Coordinates) findRealTargetLocations(targetAddresses []Coordinates) 
 
 		tempValueOfX, err := findRealLocation(coordinate.X, xyLen.X)
 		if err != nil {
-			return []Coordinates{}, fmt.Errorf("coordinates.go at findRealTargetLocations() -> %s", err)
+			return []Coordinates{}, fmt.Errorf("coordinates.go line 20 -> %s", err)
 		}
 
 		tempValueOfY, err := findRealLocation(coordinate.Y, xyLen.Y)
 		if err != nil {
-			return []Coordinates{}, fmt.Errorf("coordinates.go at findRealTargetLocations() -> %s", err)
+			return []Coordinates{}, fmt.Errorf("coordinates.go line 25 -> %s", err)
 		}
 		ret = append(ret, Coordinates{X: tempValueOfX, Y: tempValueOfY})
 	}
 	return ret, nil
 
 }
-
-

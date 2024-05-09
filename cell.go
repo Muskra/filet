@@ -1,7 +1,7 @@
 package filet
 
 import (
-    "fmt"
+	"fmt"
 )
 
 /* define a cell, by default, isIn should be set to false, the program uses it to keep track of some conditional events. The validatedLinkedCells, is currently not used in the library, it can be used to check wether a cell have neighbors (with an opcode for example). the other elements are self explanatory. */
@@ -24,17 +24,17 @@ func (cell *Cell) Equal(rule Set, target Cell) bool {
 /* comparing the states between cell and rule */
 func (cell *Cell) IsDeadOrAlive(rules Rules) (bool, error) {
 
-    alive := IsAlive(cell.Value, rules.TargetValues.AliveValues)
-    dead := IsDead(cell.Value, rules.TargetValues.DeadValues)
+	alive := IsAlive(cell.Value, rules.TargetValues.AliveValues)
+	dead := IsDead(cell.Value, rules.TargetValues.DeadValues)
 
 	if alive == dead {
 		return false, nil //fmt.Errorf("isDeadOrAlive() -> a cell can't be both alive and dead, got alive -> %t and dead -> %t", alive, dead)
-	} else if (alive == true) && (dead == false) {
+	} else if alive && !dead {
 		return true, nil
-	} else if (dead == true) && (alive == false) {
+	} else if dead && !alive {
 		return false, nil
 	} else {
-		return false, fmt.Errorf("isDeadOrAlive() -> unexpected event when checking cell state, got alive -> %t and dead -> %t", alive, dead)
+		return false, fmt.Errorf("cell.go line 37 -> unexpected event when checking cell state, got alive -> %t and dead -> %t", alive, dead)
 	}
 }
 

@@ -10,21 +10,21 @@ const (
 // here is where the default Codes that the program naturally provides. Those can be changed as user preference. by convention and more readability, you must add an entry in the OP value, and then call the custom made function.
 var OP Opcodes = Opcodes{
 
-	Code: map[uint8]func(grid [][]Cell, pos []Coordinates){
+	Code: map[uint8]func(grid [][]Cell, pos []Coordinates)([][]Cell){
 
         // this function swap cells positions
-		SWAP_CELLS: func(grid [][]Cell, pos []Coordinates) {
-            swapCells(grid, pos)
+		SWAP_CELLS: func(grid [][]Cell, pos []Coordinates) [][]Cell {
+            return swapCells(grid, pos)
 		},
 
 		// this function kills a cell value, channging it's state and value both to zero/false
-		KILL_CELL: func(grid [][]Cell, pos []Coordinates) {
-            killCell(grid, pos)
+		KILL_CELL: func(grid [][]Cell, pos []Coordinates) [][]Cell {
+            return killCell(grid, pos)
 		},
 
 		// this function is an opcode used to opy a cell value to another
-		COPY_VALUE: func(grid [][]Cell, pos []Coordinates) {
-            copyValue(grid, pos)
+		COPY_VALUE: func(grid [][]Cell, pos []Coordinates) [][]Cell {
+            return copyValue(grid, pos)
 		},
 	},
 }
@@ -40,7 +40,6 @@ func swapCells(grid [][]Cell, pos []Coordinates) [][]Cell {
 			
     // swap coordinates to prevent misleading values
 	grid[cellPosition.X][cellPosition.Y].Position.X, grid[targetPosition.X][targetPosition.Y].Position.X = grid[targetPosition.X][targetPosition.Y].Position.X, grid[cellPosition.X][cellPosition.Y].Position.X
-			
     grid[cellPosition.X][cellPosition.Y].Position.Y, grid[targetPosition.Y][targetPosition.Y].Position.Y = grid[targetPosition.Y][targetPosition.Y].Position.Y, grid[cellPosition.X][cellPosition.Y].Position.Y
 
     return grid
@@ -54,10 +53,9 @@ func killCell(grid [][]Cell, pos []Coordinates) [][]Cell {
 
     // to work as a game of life or any simulation that works with neighborhoods, this underneath value maybe reset. In spark demo we don't need to use this value
 	//grid[cellPosition.X][cellPosition.Y].Value = 0
-	grid[posX][posY].State = false
+    grid[posX][posY].State = false
 
     return grid
-
 }
 
 // this function copy a cell value to another

@@ -15,16 +15,17 @@ func (gd Grid) ActualCellState(cellPosition Coordinates, rules Rules) (bool, err
 
 	b, err := grid[cellPosition.X][cellPosition.Y].IsDeadOrAlive(rules)
 	if err != nil {
-		return false, fmt.Errorf("grid.go line 16 -> %s", err)
+		return false, fmt.Errorf("grid.go line 18 -> %s", err)
 	}
 
 	return b, nil
 }
 
 /* this function processes the next generation of a cell */
-func (grid Grid) NextGeneration(cellPosition Coordinates, targetLocations []Coordinates, targetValues []int, ruleSet []Set) error {
+func (grid Grid) NextGeneration(cellPosition Coordinates, targetLocations []Coordinates, targetValues []int, ruleSet []Set) (Grid, error) {
 
 	state := grid.State
+	var err error
 
 	//fmt.Println("\n\n", targetLocations)
 	for _, targetPosition := range targetLocations {
@@ -38,23 +39,45 @@ func (grid Grid) NextGeneration(cellPosition Coordinates, targetLocations []Coor
 
 		index, ok := ruleCheck(ruleSet, cell, target)
 		if ok {
-			err := OP.ProcessRule(ruleSet[index].Opcode, state, cellPosition, targetPosition)
-
+			grid.State, err = OP.ProcessRule(
+				ruleSet[index].Opcode, state, cellPosition, targetPosition)
 			if err != nil {
-				return fmt.Errorf("grid.go line 38 -> %s", err)
+				return Grid{}, fmt.Errorf("grid.go line 45 -> %s", err)
 			}
 		}
 	}
-	return nil
+	return grid, nil
+}
+
+func (grid Grid) FormatState() string {
+	formatted := ""
+
+	for _, e := range grid.State {
+		for _, v := range e {
+
+			if v.Value < 0 {
+				formatted = fmt.Sprintf("%s%d", formatted, -v.Value)
+
+			} else {
+				formatted = fmt.Sprintf("%s%d", formatted, v.Value)
+			}
+		}
+	}
+
+	return formatted
 }
 
 func (grid Grid) PrintState() {
-    for _, e := range grid.State {
-        for _, v := range e {
-            fmt.Printf("%d", v.Value)
-        }
-    }
-    fmt.Println()
+	for _, e := range grid.State {
+		for _, v := range e {
+			if v.Value < 0 {
+				fmt.Printf("%d", -v.Value)
+			} else {
+				fmt.Printf("%d", v.Value)
+			}
+		}
+	}
+	fmt.Println()
 }
 
 func (grid Grid) PrintDetailedState() {

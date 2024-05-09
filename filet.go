@@ -22,30 +22,30 @@ func Catch(state [][]Cell, rules Rules) ([][]Cell, error) {
 
 			grid.State[i][j].State, err = grid.ActualCellState(coo, rules)
 			if err != nil {
-				return nil, fmt.Errorf("filet.go line 25 -> %s\n", err)
+				return nil, fmt.Errorf("filet.go line 25 -> %s", err)
 			}
 
-			realTargetLocations, err :=  Coordinates{
-                X: len(grid.State),
-                Y: len(grid.State[0]),
-            }.findRealTargetLocations(rules.TargetCellsLocations)
+			realTargetLocations, err := Coordinates{
+				X: len(grid.State),
+				Y: len(grid.State[0]),
+			}.findRealTargetLocations(rules.TargetCellsLocations)
 
 			if err != nil {
-				return [][]Cell{}, fmt.Errorf("filet.go line 34 -> %s\n", err)
+				return [][]Cell{}, fmt.Errorf("filet.go line 34 -> %s", err)
 			}
 
 			switch grid.State[i][j].State {
 
 			case true:
-				err := grid.NextGeneration(coo, realTargetLocations, rules.TargetValues.TargetIfAlive, rules.RuleSet[:])
+				grid, err = grid.NextGeneration(coo, realTargetLocations, rules.TargetValues.TargetIfAlive, rules.RuleSet[:])
 				if err != nil {
-					return nil, fmt.Errorf("filet.go line 42 -> %s\n", err)
+					return nil, fmt.Errorf("filet.go line 42 -> %s", err)
 				}
 
 			case false:
-				err := grid.NextGeneration(coo, realTargetLocations, rules.TargetValues.TargetIfDead, rules.RuleSet[:])
+				grid, err = grid.NextGeneration(coo, realTargetLocations, rules.TargetValues.TargetIfDead, rules.RuleSet[:])
 				if err != nil {
-					return nil, fmt.Errorf("filet.go line 48 -> %s\n", err)
+					return nil, fmt.Errorf("filet.go line 48 -> %s", err)
 				}
 			}
 		}

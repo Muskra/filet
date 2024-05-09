@@ -1,8 +1,7 @@
 package filet
 
 import (
-    "fmt"
-
+	"fmt"
 )
 
 /* those are values used in some conditional statements, like if you want to target only some specific values, they are in those slices. For the alive/dead values, those are being used to define the states of the values that are alive or dead. The targetIf ones are being used to decide wether a value can be a target from alive/dead states. */
@@ -11,6 +10,16 @@ type Target struct {
 	DeadValues    []int
 	TargetIfAlive []int
 	TargetIfDead  []int
+}
+
+// NewTarget function return an empty Target Type
+func NewTarget() Target {
+    return Target{
+        AliveValues: make([]int, 0),
+        DeadValues: make([]int, 0),
+        TargetIfAlive: make([]int, 0),
+        TargetIfDead: make([]int, 0),
+    }
 }
 
 func findRealLocation(target int, sizeLimit int) (int, error) {
@@ -25,7 +34,7 @@ func findRealLocation(target int, sizeLimit int) (int, error) {
 		return target, nil
 
 	} else {
-		return 0, fmt.Errorf("target.go at findRealLocation() -> Error when searching for new position, got 'target = %d', 'sizeLimit = %d'", target, sizeLimit)
+		return 0, fmt.Errorf("target.go line 27 -> Error when searching for new position, got 'target = %d', 'sizeLimit = %d'", target, sizeLimit)
 	}
 }
 
@@ -65,4 +74,3 @@ func isTargetIn(target int, values []int) bool {
 	}
 	return false
 }
-
