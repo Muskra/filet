@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-/* those are values used in some conditional statements, like if you want to target only some specific values, they are in those slices. For the alive/dead values, those are being used to define the states of the values that are alive or dead. The targetIf ones are being used to decide wether a value can be a target from alive/dead states. */
+// Target Type contains values that are used in some conditional statements, like if you want to target only some specific values, they are in those slices. For the alive/dead values, those are being used to define the states of the values that are alive or dead. The targetIf ones are being used to decide wether a value can be a target from alive/dead states. */
 type Target struct {
 	AliveValues   []int
 	DeadValues    []int
@@ -14,14 +14,15 @@ type Target struct {
 
 // NewTarget function return an empty Target Type
 func NewTarget() Target {
-    return Target{
-        AliveValues: make([]int, 0),
-        DeadValues: make([]int, 0),
-        TargetIfAlive: make([]int, 0),
-        TargetIfDead: make([]int, 0),
-    }
+	return Target{
+		AliveValues:   make([]int, 0),
+		DeadValues:    make([]int, 0),
+		TargetIfAlive: make([]int, 0),
+		TargetIfDead:  make([]int, 0),
+	}
 }
 
+// FindRealLocation function prevent given coordinates to go out of bounds of the Grid. This function takes the targetted position as int with the wanted max/min size of the grid
 func findRealLocation(target int, sizeLimit int) (int, error) {
 
 	if target < 0 {
@@ -38,6 +39,7 @@ func findRealLocation(target int, sizeLimit int) (int, error) {
 	}
 }
 
+// negativeLoopThrougth function iterate throught a sizeLimit int with a negative target integer
 func negativeLoopThrougth(target int, sizeLimit int) int {
 
 	temp := sizeLimit
@@ -51,6 +53,7 @@ func negativeLoopThrougth(target int, sizeLimit int) int {
 	return temp
 }
 
+// positiveLoopThrougth function iterate throught a sizeLimit int with a positive target integer
 func positiveLoopThrougth(target int, sizeLimit int) int {
 
 	temp := 0
@@ -64,7 +67,7 @@ func positiveLoopThrougth(target int, sizeLimit int) int {
 	return temp
 }
 
-/* search from a slice of elements if a value is in the slice, here we use it to check wether the value is in a tagert list */
+// isTargetIn function search from a slice of elements if a value is in the slice, here we use it to check wether the value is in a tagert list */
 func isTargetIn(target int, values []int) bool {
 
 	for _, v := range values {

@@ -1,10 +1,8 @@
 package filet
 
-import (
+import ()
 
-)
-
-// this structure is being used to define the actual rules and conditions for the automata 
+// Set Type is being used to define the actual rules and conditions for the automata
 type Set struct {
 	CellValue        int
 	CellState        bool
@@ -14,14 +12,14 @@ type Set struct {
 	Opcode           uint8
 }
 
-// NewSet returns an empty Set Type
+// NewSet function returns an empty Set Type
 func NewSet() Set {
-    return Set{
-        CellValue:        0,
-        CellState:        false,
-        TargetValue:      0,
-        TargetState:      false,
-        ShouldBeTargeted: false,
-        Opcode:           0,
-    }
+	return Set{
+		CellValue:        0,
+		CellState:        false,
+		TargetValue:      0,
+		TargetState:      false,
+		ShouldBeTargeted: false,
+		Opcode:           0,
+	}
 }

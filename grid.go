@@ -2,13 +2,14 @@ package filet
 
 import (
 	"fmt"
+    "slices"
 )
 
 type Grid struct {
 	State [][]Cell
 }
 
-/* return the actual state of a given cell in comparison with a given rule */
+// ActualCellState function returns the actual state of a given cell in comparison with a given rule
 func (gd Grid) ActualCellState(cellPosition Coordinates, rules Rules) (bool, error) {
 
 	grid := gd.State
@@ -21,19 +22,18 @@ func (gd Grid) ActualCellState(cellPosition Coordinates, rules Rules) (bool, err
 	return b, nil
 }
 
-/* this function processes the next generation of a cell */
+// NextGeneration function processes the next generation of a given cell
 func (grid Grid) NextGeneration(cellPosition Coordinates, targetLocations []Coordinates, targetValues []int, ruleSet []Set) (Grid, error) {
 
 	state := grid.State
 	var err error
 
-	//fmt.Println("\n\n", targetLocations)
 	for _, targetPosition := range targetLocations {
 
 		cell := state[cellPosition.X][cellPosition.Y]
 		target := state[targetPosition.X][targetPosition.Y]
 
-		/* check if the cell and the target are in the targetted values respectively */
+		// check if the cell and the target are in the targetted values respectively
 		cell.IsIn = isTargetIn(cell.Value, targetValues[:])
 		target.IsIn = isTargetIn(target.Value, targetValues[:])
 
@@ -49,6 +49,23 @@ func (grid Grid) NextGeneration(cellPosition Coordinates, targetLocations []Coor
 	return grid, nil
 }
 
+// revTwoDimSlice function simply reverse a whole 2D slice
+func (grid Grid) Reverse() Grid {
+
+    cells := grid.State
+
+    for xIndex := range cells {
+        slices.Reverse(cells[xIndex])
+    }
+    
+    slices.Reverse(cells)
+    
+    return Grid{
+        State: cells,
+    }
+}
+
+// FormatState function appends in a string every Values of a given Grid.State Cells Type appended as positive integers. This function is more of a test tool to see if the Grid.State has been altered by Rules Type
 func (grid Grid) FormatState() string {
 	formatted := ""
 
@@ -67,6 +84,7 @@ func (grid Grid) FormatState() string {
 	return formatted
 }
 
+// PrintState function as it's named prints all the values of a given Grid Type. The format is the same as in FormatState function
 func (grid Grid) PrintState() {
 	for _, e := range grid.State {
 		for _, v := range e {
@@ -80,6 +98,7 @@ func (grid Grid) PrintState() {
 	fmt.Println()
 }
 
+// PrintDetailedState function prints all the details about a given Grid Type State
 func (grid Grid) PrintDetailedState() {
 	for _, e := range grid.State {
 		for _, v := range e {
@@ -96,7 +115,8 @@ func (grid Grid) PrintDetailedState() {
 	}
 }
 
-func GenerateTwoDimArray(lines int, cols int) [][]Cell {
+// GenerateTwoDimSlice function generates a 2D slice from given size
+func GenerateTwoDimSlice(lines int, cols int) [][]Cell {
 
 	grid := make([][]Cell, 0)
 

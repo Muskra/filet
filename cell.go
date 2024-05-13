@@ -13,6 +13,7 @@ type Cell struct {
 	IsIn                 bool
 }
 
+// Equal function calculates if a given rule Set Type and a target Cell Type are equal. Returns a boolean
 func (cell *Cell) Equal(rule Set, target Cell) bool {
 	return (cell.Value == rule.CellValue) &&
 		(cell.State == rule.CellState) &&
@@ -21,14 +22,15 @@ func (cell *Cell) Equal(rule Set, target Cell) bool {
 		(target.IsIn == rule.ShouldBeTargeted)
 }
 
-/* comparing the states between cell and rule */
+// IsDeadOrAlive function compares the states between Cell Type and Rules Type from the Alive/Dead point of view
 func (cell *Cell) IsDeadOrAlive(rules Rules) (bool, error) {
 
 	alive := IsAlive(cell.Value, rules.TargetValues.AliveValues)
 	dead := IsDead(cell.Value, rules.TargetValues.DeadValues)
 
 	if alive == dead {
-		return false, nil //fmt.Errorf("isDeadOrAlive() -> a cell can't be both alive and dead, got alive -> %t and dead -> %t", alive, dead)
+        // at first i wanted that every cells can't be both dead and alive but it made the program unreliable. So i changed it to false, behavior was basically the same, everything was skipped so life prevail on death.
+        return true, nil //fmt.Errorf("isDeadOrAlive() -> a cell can't be both alive and dead, got alive -> %t and dead -> %t", alive, dead)
 	} else if alive && !dead {
 		return true, nil
 	} else if dead && !alive {
@@ -38,6 +40,7 @@ func (cell *Cell) IsDeadOrAlive(rules Rules) (bool, error) {
 	}
 }
 
+// IsAlive function checks if an int value is in a []int slice. Returns a boolean
 func IsAlive(c int, t []int) bool {
 	for i := range t {
 		if c == t[i] {
@@ -47,6 +50,7 @@ func IsAlive(c int, t []int) bool {
 	return false
 }
 
+// IsDead function checks if an int value is in a []int slice. Returns a boolean
 func IsDead(c int, t []int) bool {
 	for i := range t {
 		if c == t[i] {
@@ -56,6 +60,7 @@ func IsDead(c int, t []int) bool {
 	return false
 }
 
+// PrintDetailedState function printout all the details about a 2D slice of Cell Type
 func PrintDetailedState(state [][]Cell) {
 	for _, e := range state {
 		for _, v := range e {

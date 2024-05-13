@@ -1,0 +1,202 @@
+package filet // import "test/filet"
+
+
+CONSTANTS
+
+const (
+	SWAP_CELLS uint8 = iota
+	KILL_CELL
+	COPY_VALUE
+)
+    for more convenience, the opcodes are generated automatically as constant
+
+
+FUNCTIONS
+
+func CatchOne(state [][]Cell, rules Rules) ([][]Cell, error)
+    Catch function is used to process a Grid.State Type to the next generation.
+    It's actually the 'main' function or tool that the filet library provides
+
+func GenerateTwoDimSlice(lines int, cols int) [][]Cell
+    GenerateTwoDimSlice function generates a 2D slice from given size
+
+func IsAlive(c int, t []int) bool
+    IsAlive function checks if an int value is in a []int slice. Returns a
+    boolean
+
+func IsDead(c int, t []int) bool
+    IsDead function checks if an int value is in a []int slice. Returns a
+    boolean
+
+func PrintDetailedState(state [][]Cell)
+    PrintDetailedState function printout all the details about a 2D slice of
+    Cell Type
+
+func copyValue(grid [][]Cell, pos []Coordinates) [][]Cell
+    copyValue function copy a cell value to another
+
+func findRealLocation(target int, sizeLimit int) (int, error)
+    FindRealLocation function prevent given coordinates to go out of bounds of
+    the Grid. This function takes the targetted position as int with the wanted
+    max/min size of the grid
+
+func isTargetIn(target int, values []int) bool
+    isTargetIn function search from a slice of elements if a value is in the
+    slice, here we use it to check wether the value is in a tagert list */
+
+func killCell(grid [][]Cell, pos []Coordinates) [][]Cell
+    killCell function kills a Cell
+
+func negativeLoopThrougth(target int, sizeLimit int) int
+    negativeLoopThrougth function iterate throught a sizeLimit int with a
+    negative target integer
+
+func positiveLoopThrougth(target int, sizeLimit int) int
+    positiveLoopThrougth function iterate throught a sizeLimit int with a
+    positive target integer
+
+func ruleCheck(ruleSet []Set, cell Cell, target Cell) (int, bool)
+    ruleCheck function checks if a rule is applicable from the context of the
+    actual cell and it's targetted value
+
+func swapCells(grid [][]Cell, pos []Coordinates) [][]Cell
+    swapCells function swap cells positions
+
+
+TYPES
+
+type Cell struct {
+	Position             Coordinates
+	Value                int
+	State                bool
+	ValidatedLinkedCells []int
+	IsIn                 bool
+}
+    define a cell, by default, isIn should be set to false, the program uses
+    it to keep track of some conditional events. The validatedLinkedCells,
+    is currently not used in the library, it can be used to check wether a cell
+    have neighbors (with an opcode for example). the other elements are self
+    explanatory.
+
+func (cell *Cell) Equal(rule Set, target Cell) bool
+    Equal function calculates if a given rule Set Type and a target Cell Type
+    are equal. Returns a boolean
+
+func (cell *Cell) IsDeadOrAlive(rules Rules) (bool, error)
+    IsDeadOrAlive function compares the states between Cell Type and Rules Type
+    from the Alive/Dead point of view
+
+type Coordinates struct {
+	X int
+	Y int
+}
+
+func (xyLen Coordinates) FindRealTargetLocations(targetAddresses []Coordinates) ([]Coordinates, error)
+    FindRealTargetLocations function checks if any targetAddresses Coordinates
+    Type from a given Cell Coordinates Type would be unreachable or out of bound
+    of the Grid Type. For example your grid is of size 4x4 but you want to found
+    the location 'x = -46' along the value 'y = 82', the function cicle througth
+    the grid to find the actual position where we want to target.
+
+type Grid struct {
+	State [][]Cell
+}
+
+func CatchNthGen(grid Grid, rules Rules, lifetime int) (Grid, error)
+    CatchNthGen function process the next 'Nth' number of generations
+
+func (gd Grid) ActualCellState(cellPosition Coordinates, rules Rules) (bool, error)
+    ActualCellState function returns the actual state of a given cell in
+    comparison with a given rule
+
+func (grid Grid) FormatState() string
+    FormatState function appends in a string every Values of a given Grid.State
+    Cells Type appended as positive integers. This function is more of a test
+    tool to see if the Grid.State has been altered by Rules Type
+
+func (grid Grid) NextGeneration(cellPosition Coordinates, targetLocations []Coordinates, targetValues []int, ruleSet []Set) (Grid, error)
+    NextGeneration function processes the next generation of a given cell
+
+func (grid Grid) PrintDetailedState()
+    PrintDetailedState function prints all the details about a given Grid Type
+    State
+
+func (grid Grid) PrintState()
+    PrintState function as it's named prints all the values of a given Grid
+    Type. The format is the same as in FormatState function
+
+func (grid Grid) Reverse() Grid
+    revTwoDimSlice function simply reverse a whole 2D slice
+
+type Opcodes struct {
+	Code map[uint8]func(grid [][]Cell, pos []Coordinates) [][]Cell
+}
+    Opcodes Type defines a Code map with contain each Code to match on with the
+    associated function to operate with
+
+var OP Opcodes = Opcodes{
+
+	Code: map[uint8]func(grid [][]Cell, pos []Coordinates) [][]Cell{
+
+		SWAP_CELLS: func(grid [][]Cell, pos []Coordinates) [][]Cell {
+			return swapCells(grid, pos)
+		},
+
+		KILL_CELL: func(grid [][]Cell, pos []Coordinates) [][]Cell {
+			return killCell(grid, pos)
+		},
+
+		COPY_VALUE: func(grid [][]Cell, pos []Coordinates) [][]Cell {
+			return copyValue(grid, pos)
+		},
+	},
+}
+    here is where the default Codes that the program naturally provides. Those
+    can be changed as user preference. by convention and more readability, you
+    must add an entry in the OP value, and then call the custom made function.
+
+func (opcd Opcodes) ProcessRule(opcode uint8, grid [][]Cell, cellPosition Coordinates, targetPosition Coordinates) ([][]Cell, error)
+    ProcessRule function executes rules (as functions) from the given opcode
+
+type Rules struct {
+	RuleSet              []Set
+	TargetCellsLocations []Coordinates
+	TargetValues         Target
+}
+    Rules Type are assembling some of other structs, where Target and Set are
+    being used. Another slice is used here to define where all the targets will
+    be at in the grid, if you decide to go out of bounds, it will loop througth
+    the sides of the grid to prevent errors.
+
+func NewRules() Rules
+    NewRules function returns an empty Rules Type
+
+type Set struct {
+	CellValue        int
+	CellState        bool
+	TargetValue      int
+	TargetState      bool
+	ShouldBeTargeted bool
+	Opcode           uint8
+}
+    Set Type is being used to define the actual rules and conditions for the
+    automata
+
+func NewSet() Set
+    NewSet function returns an empty Set Type
+
+type Target struct {
+	AliveValues   []int
+	DeadValues    []int
+	TargetIfAlive []int
+	TargetIfDead  []int
+}
+    Target Type contains values that are used in some conditional statements,
+    like if you want to target only some specific values, they are in those
+    slices. For the alive/dead values, those are being used to define the states
+    of the values that are alive or dead. The targetIf ones are being used to
+    decide wether a value can be a target from alive/dead states. */
+
+func NewTarget() Target
+    NewTarget function return an empty Target Type
+

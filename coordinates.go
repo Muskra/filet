@@ -9,7 +9,8 @@ type Coordinates struct {
 	Y int
 }
 
-func (xyLen Coordinates) findRealTargetLocations(targetAddresses []Coordinates) ([]Coordinates, error) {
+// FindRealTargetLocations function checks if any targetAddresses Coordinates Type from a given Cell Coordinates Type would be unreachable or out of bound of the Grid Type. For example your grid is of size 4x4 but you want to found the location 'x = -46' along the value 'y = 82', the function cicle througth the grid to find the actual position where we want to target.
+func (xyLen Coordinates) FindRealTargetLocations(targetAddresses []Coordinates) ([]Coordinates, error) {
 
 	ret := make([]Coordinates, 0)
 

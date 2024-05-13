@@ -4,8 +4,8 @@ import (
 	"fmt"
 )
 
-/* this is the "main" function of this library, it's being used to process generations grom a grid to another generation */
-func Catch(state [][]Cell, rules Rules) ([][]Cell, error) {
+// Catch function is used to process a Grid.State Type to the next generation. It's actually the 'main' function or tool that the filet library provides
+func CatchOne(state [][]Cell, rules Rules) ([][]Cell, error) {
 
 	grid := Grid{
 		State: state,
@@ -28,7 +28,7 @@ func Catch(state [][]Cell, rules Rules) ([][]Cell, error) {
 			realTargetLocations, err := Coordinates{
 				X: len(grid.State),
 				Y: len(grid.State[0]),
-			}.findRealTargetLocations(rules.TargetCellsLocations)
+			}.FindRealTargetLocations(rules.TargetCellsLocations)
 
 			if err != nil {
 				return [][]Cell{}, fmt.Errorf("filet.go line 34 -> %s", err)
@@ -52,3 +52,19 @@ func Catch(state [][]Cell, rules Rules) ([][]Cell, error) {
 	}
 	return grid.State, nil
 }
+
+// CatchNthGen function process the next 'Nth' number of generations
+func CatchNthGen(grid Grid, rules Rules, lifetime int) (Grid, error) {
+
+    var err error
+
+	for i := 0; i < lifetime; i = i + 1 {
+		grid.State, err = CatchOne(grid.State, rules)
+		if err != nil {
+			return Grid{}, fmt.Errorf("filet.go line 64 -> Can't process generation '%d'.", i)
+		}
+	}
+
+    return grid, nil
+}
+

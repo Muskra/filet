@@ -1,10 +1,8 @@
 package filet
 
-import (
+import ()
 
-)
-
-// Rules are assembling some of other structs, where Target and Set are being used. Another slice is used here to define where all the targets will be at in the grid, if you decide to go out of bounds, it will loop througth the sides of the grid to prevent errors.
+// Rules Type are assembling some of other structs, where Target and Set are being used. Another slice is used here to define where all the targets will be at in the grid, if you decide to go out of bounds, it will loop througth the sides of the grid to prevent errors.
 type Rules struct {
 	RuleSet              []Set
 	TargetCellsLocations []Coordinates
@@ -13,11 +11,11 @@ type Rules struct {
 
 // NewRules function returns an empty Rules Type
 func NewRules() Rules {
-    return Rules{
-        RuleSet: make([]Set, 0),
-        TargetCellsLocations: make([]Coordinates, 0),
-        TargetValues: NewTarget(),
-    }
+	return Rules{
+		RuleSet:              make([]Set, 0),
+		TargetCellsLocations: make([]Coordinates, 0),
+		TargetValues:         NewTarget(),
+	}
 }
 
 // ruleCheck function checks if a rule is applicable from the context of the actual cell and it's targetted value
