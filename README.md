@@ -1,4 +1,4 @@
-# FILET
+# FILET 
 
 A customizable cellullar automata.
 
@@ -18,15 +18,16 @@ You throw a Grid Type into a 'filet.CatchOne()' or a 'filet.CatchNthGen()' funct
 The library has some files made specifically to be modified like 'filet/config.go'. This file contains all the opcodes you want to use in the program. Any opcode can do anything, some tooling is provided but you can do whatever you want with them.
 
 There is also a 'Rules' Type provided to make custom rules that the program will check before applying an opcode. The rules are applied if and only if:
-    * a cell 'State' is equal to a rule cell 'Value' AND
-    * a cell 'State' is equal to a rule cell 'State' AND
-        * So this way we check if the rule really should be considered for this rule application
-    * a target 'Value' is equal to a rule 'TargetValue' AND
-        * this 'TargetValue' represent the 'Value' of the target to compare with
-    * a target 'State' is equal to a rule 'TargetState' AND
-        * thid 'TargetState' represent the 'State' of the target to compare with
-    * the target 'IsIn' value is equal to the rule 'ShouldBeTargeted' value
-        * this is a boolean to simply tell if the rule should be applied or not in the previous conditions already checked
+
+- a cell 'State' is equal to a rule cell 'Value' AND
+- a cell 'State' is equal to a rule cell 'State' AND
+   - So this way we check if the rule really should be considered for this rule application
+- a target 'Value' is equal to a rule 'TargetValue' AND
+   - this 'TargetValue' represent the 'Value' of the target to compare with
+- a target 'State' is equal to a rule 'TargetState' AND
+   - this 'TargetState' represent the 'State' of the target to compare with
+- the target 'IsIn' value is equal to the rule 'ShouldBeTargeted' value
+   - this is a boolean to simply tell if the rule should be applied or not in the previous conditions already checked
 
 ## Provided tooling within the library
 
@@ -34,37 +35,37 @@ The library provides some accessible methods and functions, the list is below:
 
 > you can generate the documentation of them with the 'godoc' or 'go doc' commands
 
-    * cell.go
-        * Methods
-            * Equal
-            * IsDeadOrAlive
-        * Functions
-            * IsAlive
-            * IsDead
-            * PrintDetailedState
-    * coordinates.go
-        * Methods
-            * FindRealTargetLocations
-    * filet.go
-        * Methods
-            * CatchOne
-            * CatchNthGen
-    * grid.go
-        * Methods
-            * ActualCellState
-            * NextGeneration
-            * Reverse
-            * FormatState
-            * PrintState
-            * PrintDetailedState
-        * Functions
-            * GenerateTwoDimSlice
-    * opcodes.go
-        * Methods
-            * ProcessRule
-    * set.go
-        * Functions
-            * NewSet
-    * targets.go
-        * Functions
-            * NewTarget
+- cell.go
+   - Methods
+      - Equal
+      - IsDeadOrAlive
+   - Functions
+      - IsAlive
+      - IsDead
+      - PrintDetailedState
+- coordinates.go
+   - Methods
+      - FindRealTargetLocations
+- filet.go
+   - Methods
+      - CatchOne
+      - CatchNthGen
+- grid.go
+   - Methods
+      - ActualCellState
+         - NextGeneration
+         - Reverse
+         - FormatState
+         - PrintState
+         - PrintDetailedState
+   - Functions
+      - GenerateTwoDimSlice
+- opcodes.go
+   - Methods
+      - ProcessRule
+- set.go
+   - Functions
+      - NewSet
+- targets.go
+   - Functions
+      - NewTarget
